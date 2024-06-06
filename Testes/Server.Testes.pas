@@ -69,16 +69,16 @@ procedure TServidorDelphiTestes.TestAddVideoToServer;
 var
   Response: string;
   JSONObj: TJSONObject;
-  ServerID: string;
+  idServidor: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
   JSONObj := TJSONObject.Create;
   try
     JSONObj.AddPair('description', 'My Test Video');
     JSONObj.AddPair('content', TNetEncoding.Base64.EncodeBytesToString(TEncoding.UTF8.GetBytes('Hello, World!')));
     JSONObj.AddPair('inclusion_date', DateToISO8601(Now, False));
 
-    Response := HTTPClient.Post('http://localhost:8080/api/servers/' + ServerID + '/videos', TStringStream.Create(JSONObj.ToString, TEncoding.UTF8));
+    Response := HTTPClient.Post('http://localhost:8080/api/servers/' + idServidor + '/videos', TStringStream.Create(JSONObj.ToString, TEncoding.UTF8));
     Assert.IsNotEmpty(Response, 'Response should not be empty');
 
   finally
@@ -88,10 +88,10 @@ end;
 
 procedure TServidorDelphiTestes.TestCheckServerAvailability;
 var
-  ServerID, Response: string;
+  idServidor, Response: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  Response := HTTPClient.Get('http://localhost:8080/api/servers/available/' + ServerID);
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  Response := HTTPClient.Get('http://localhost:8080/api/servers/available/' + idServidor);
   Assert.IsNotEmpty(Response, 'Response should not be empty');
 end;
 
@@ -115,14 +115,14 @@ end;
 
 procedure TServidorDelphiTestes.TestDownloadBinaryVideo;
 var
-  ServerID, VideoID: string;
+  idServidor, idVideo: string;
   Response: TMemoryStream;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  VideoID := '{20BC80F9-8F4C-4C4E-A271-69C246248FE2}';
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  idVideo := '{20BC80F9-8F4C-4C4E-A271-69C246248FE2}';
   Response := TMemoryStream.Create;
   try
-    HTTPClient.Get('http://localhost:8080/api/servers/' + ServerID + '/videos/' + VideoID + '/binary', Response);
+    HTTPClient.Get('http://localhost:8080/api/servers/' + idServidor + '/videos/' + idVideo + '/binary', Response);
     Assert.IsTrue(Response.Size > 0, 'Response stream should not be empty');
 
   finally
@@ -132,20 +132,20 @@ end;
 
 procedure TServidorDelphiTestes.TestGetServer;
 var
-  ServerID, Response: string;
+  idServidor, Response: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  Response := HTTPClient.Get('http://localhost:8080/api/servers/' + ServerID);
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  Response := HTTPClient.Get('http://localhost:8080/api/servers/' + idServidor);
   Assert.IsNotEmpty(Response, 'Response should not be empty');
 end;
 
 procedure TServidorDelphiTestes.TestGetVideoData;
 var
-  ServerID, VideoID, Response: string;
+  idServidor, idVideo, Response: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  VideoID := '{20BC80F9-8F4C-4C4E-A271-69C246248FE2}';
-  Response := HTTPClient.Get('http://localhost:8080/api/servers/' + ServerID + '/videos/' + VideoID);
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  idVideo := '{20BC80F9-8F4C-4C4E-A271-69C246248FE2}';
+  Response := HTTPClient.Get('http://localhost:8080/api/servers/' + idServidor + '/videos/' + idVideo);
   Assert.IsNotEmpty(Response, 'Response should not be empty');
 end;
 
@@ -159,10 +159,10 @@ end;
 
 procedure TServidorDelphiTestes.TestListVideos;
 var
-  ServerID, Response: string;
+  idServidor, Response: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  Response := HTTPClient.Get('http://localhost:8080/api/servers/' + ServerID + '/videos');
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  Response := HTTPClient.Get('http://localhost:8080/api/servers/' + idServidor + '/videos');
   Assert.IsNotEmpty(Response, 'Response should not be empty');
 end;
 
@@ -185,19 +185,19 @@ end;
 
 procedure TServidorDelphiTestes.TestRemoveServer;
 var
-  ServerID: string;
+  idServidor: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  HTTPClient.Delete('http://localhost:8080/api/servers/' + ServerID);
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  HTTPClient.Delete('http://localhost:8080/api/servers/' + idServidor);
 end;
 
 procedure TServidorDelphiTestes.TestRemoveVideo;
 var
-  ServerID, VideoID: string;
+  idServidor, idVideo: string;
 begin
-  ServerID := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
-  VideoID := '{20BC80F9-8F4C-4C4E-A271-69C246248FE2}';
-  HTTPClient.Delete('http://localhost:8080/api/servers/' + ServerID + '/videos/' + VideoID);
+  idServidor := '{BF9EADEA-3F71-4008-97BD-A192AB797307}';
+  idVideo := '{20BC80F9-8F4C-4C4E-A271-69C246248FE2}';
+  HTTPClient.Delete('http://localhost:8080/api/servers/' + idServidor + '/videos/' + idVideo);
 end;
 
 initialization

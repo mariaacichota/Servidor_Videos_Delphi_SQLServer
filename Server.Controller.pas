@@ -16,21 +16,21 @@ type
     class procedure InitializeConnection;
 
   public
-    class function CreateServer(AName, AIPAddress: string; AIPPort: Integer): TJSONObject;
-    class function CreateVideo(Server: TServer; Description, Content: String; InclusionDate: TDateTime): TJSONObject;
-    class function UpdateServer(AID: TGUID; AName, AIPAddress: string; AIPPort: Integer): TJSONObject;
-    class function DeleteServer(AID: TGUID): Boolean;
-    class function DeleteVideo(ServerID, VideoID: TGUID): Boolean;
-    class function GetServer(AID: TGUID): TJSONObject;
-    class function GetVideo(ServerID, VideoID: TGUID): TJSONObject;
-    class function CheckServerAvailability(AID: TGUID): Boolean;
+    class function CreateServer(nomeServidor, ipAddress: string; ipPort: Integer): TJSONObject;
+    class function CreateVideo(Server: TServer; descricao, conteudo: String; dataInclusao: TDateTime): TJSONObject;
+    class function UpdateServer(idServidor: TGUID; nomeServidor, ipAddress: string; ipPort: Integer): TJSONObject;
+    class function DeleteServer(idServidor: TGUID): Boolean;
+    class function DeleteVideo(idServidor, idVideo: TGUID): Boolean;
+    class function GetServer(idServidor: TGUID): TJSONObject;
+    class function GetVideo(idServidor, idVideo: TGUID): TJSONObject;
+    class function CheckServerAvailability(idServidor: TGUID): Boolean;
     class function GetAllServers: TJSONArray;
     class function GetAllVideos: TJSONArray;
     class function DownloadBinaryVideo(Video: TVideo): TStream;
-    class function DeleteVideoRecyclerProcess(Days: Integer): Boolean;
+    class function DeleteVideoRecyclerProcess(dias: Integer): Boolean;
 
-    class function FindServerByID(AID: TGUID): TServer;
-    class function FindVideoByIDs(ServerID, VideoID: TGUID): TVideo;
+    class function FindServerByID(idServidor: TGUID): TServer;
+    class function FindVideoByIDs(idServidor, idVideo: TGUID): TVideo;
   end;
 
 {$METHODINFO OFF}
@@ -42,12 +42,12 @@ uses
 
 { TServerController }
 
-class function TServerController.CheckServerAvailability(AID: TGUID): Boolean;
+class function TServerController.CheckServerAvailability(idServidor: TGUID): Boolean;
 var
   Servidor: TServer;
   TCPClient: TIdTCPClient;
 begin
-  Servidor := FindServerByID(AID);
+  Servidor := FindServerByID(idServidor);
   if Assigned(Servidor) then
   begin
     TCPClient := TIdTCPClient.Create(nil);
@@ -71,30 +71,30 @@ begin
   end;
 end;
 
-class function TServerController.CreateServer(AName, AIPAddress: string;
-  AIPPort: Integer): TJSONObject;
+class function TServerController.CreateServer(nomeServidor, ipAddress: string;
+  ipPort: Integer): TJSONObject;
 var
-  Query: TADOQuery;
-  ServerID: TGUID;
+  query: TADOquery;
+  idServidor: TGUID;
 begin
   try
     InitializeConnection;
-    ServerID := TGUID.NewGuid;
-    Query := TADOQuery.Create(nil);
+    idServidor := TGUID.NewGuid;
+    query := TADOquery.Create(nil);
     try
-      Query.Connection := FConnection;
-      Query.SQL.Text := 'INSERT INTO SERVIDOR (Id, NOME, IP_ADDRESS, IP_PORT) VALUES (:Id, :Nome, :IPAddress, :IPPort)';
-      Query.Parameters.ParamByName('Id').Value := ServerID.ToString;
-      Query.Parameters.ParamByName('Nome').Value := AName;
-      Query.Parameters.ParamByName('IPAddress').Value := AIPAddress;
-      Query.Parameters.ParamByName('IPPort').Value := AIPPort;
-      Query.ExecSQL;
+      query.Connection := FConnection;
+      query.SQL.Text := 'INSERT INTO SERVIDOR (Id, NOME, IP_ADDRESS, IP_PORT) VALUES (:Id, :Nome, :IPAddress, :IPPort)';
+      query.Parameters.ParamByName('Id').Value := idServidor.ToString;
+      query.Parameters.ParamByName('Nome').Value := nomeServidor;
+      query.Parameters.ParamByName('IPAddress').Value := ipAddress;
+      query.Parameters.ParamByName('IPPort').Value := ipPort;
+      query.ExecSQL;
 
       Result := TJSONObject.Create;
-      Result.AddPair('Id', TJSONString.Create(GuidToString(ServerID)));
-      Result.AddPair('Nome', TJSONString.Create(AName));
-      Result.AddPair('IPAddress', TJSONString.Create(AIPAddress));
-      Result.AddPair('IPPort', TJSONNumber.Create(AIPPort));
+      Result.AddPair('Id', TJSONString.Create(GuidToString(idServidor)));
+      Result.AddPair('Nome', TJSONString.Create(nomeServidor));
+      Result.AddPair('IPAddress', TJSONString.Create(ipAddress));
+      Result.AddPair('IPPort', TJSONNumber.Create(ipPort));
     except
       Result.Free;
       raise;
@@ -105,36 +105,36 @@ begin
   end;
 end;
 
-class function TServerController.CreateVideo(Server: TServer; Description,
-  Content: String; InclusionDate: TDateTime): TJSONObject;
+class function TServerController.CreateVideo(Server: TServer; descricao,
+  conteudo: String; dataInclusao: TDateTime): TJSONObject;
 var
-  Query: TADOQuery;
-  VideoID: TGUID;
-  VideoContent: TBytes;
+  query: TADOquery;
+  idVideo: TGUID;
+  videoContent: TBytes;
   InclusionDateStr: string;
 begin
   try
     InitializeConnection;
-    VideoID := TGUID.NewGuid;
-    VideoContent := TNetEncoding.Base64.DecodeStringToBytes(Content);
-    InclusionDateStr := FormatDateTime('yyyy-mm-dd hh:nn:ss', InclusionDate);
+    idVideo := TGUID.NewGuid;
+    videoContent := TNetEncoding.Base64.DecodeStringToBytes(conteudo);
+    InclusionDateStr := FormatDateTime('yyyy-mm-dd hh:nn:ss', dataInclusao);
 
-    Query := TADOQuery.Create(nil);
+    query := TADOquery.Create(nil);
     try
-      Query.Connection := FConnection;
-      Query.SQL.Text := 'INSERT INTO VIDEOS (Id, DESCRICAO, CONTEUDO, SERVIDOR_ID, DATA_INCLUSAO) VALUES (:Id, :Descricao, :Conteudo, :ServdorId, :DataInclusao)';
-      Query.Parameters.ParamByName('Id').Value := VideoID.ToString;
-      Query.Parameters.ParamByName('Descricao').Value := Description;
-      Query.Parameters.ParamByName('Conteudo').Value := VideoContent;
-      Query.Parameters.ParamByName('ServdorId').Value := Server.ID.ToString;
-      Query.Parameters.ParamByName('DataInclusao').Value := InclusionDateStr;
-      Query.ExecSQL;
+      query.Connection := FConnection;
+      query.SQL.Text := 'INSERT INTO VIDEOS (Id, DESCRICAO, CONTEUDO, SERVIDOR_ID, DATA_INCLUSAO) VALUES (:Id, :Descricao, :Conteudo, :ServdorId, :DataInclusao)';
+      query.Parameters.ParamByName('Id').Value := idVideo.ToString;
+      query.Parameters.ParamByName('Descricao').Value := descricao;
+      query.Parameters.ParamByName('Conteudo').Value := videoContent;
+      query.Parameters.ParamByName('ServdorId').Value := Server.ID.ToString;
+      query.Parameters.ParamByName('DataInclusao').Value := dataInclusao;
+      query.ExecSQL;
 
       Result := TJSONObject.Create;
-      Result.AddPair('Id', TJSONString.Create(GuidToString(VideoID)));
-      Result.AddPair('Descricao', TJSONString.Create(Description));
-      Result.AddPair('Conteudo', TJSONString.Create(Content));
-      Result.AddPair('ServdorId', TJSONString.Create(Server.ID.ToString));
+      Result.AddPair('Id', TJSONString.Create(GuidToString(idVideo)));
+      Result.AddPair('Descricao', TJSONString.Create(descricao));
+      Result.AddPair('Conteudo', TJSONString.Create(conteudo));
+      Result.AddPair('ServdorId', TJSONString.Create(Server.Id.ToString));
       Result.AddPair('DataInclusao', TJSONString.Create(InclusionDateStr));
     except
       Result.Free;
@@ -146,68 +146,68 @@ begin
   end;
 end;
 
-class function TServerController.DeleteServer(AID: TGUID): Boolean;
+class function TServerController.DeleteServer(idServidor: TGUID): Boolean;
 var
-  Query: TADOQuery;
-  RowsAffected: Integer;
+  query: TADOquery;
+  rowsAffected: Integer;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'DELETE FROM SERVIDOR WHERE Id = :ID';
-    Query.Parameters.ParamByName('ID').Value := AID.ToString;
-    RowsAffected := Query.ExecSQL;
+    query.Connection := FConnection;
+    query.SQL.Text := 'DELETE FROM SERVIDOR WHERE Id = :ID';
+    query.Parameters.ParamByName('ID').Value := idServidor.ToString;
+    rowsAffected := query.ExecSQL;
 
-    Result := RowsAffected > 0;
+    Result := rowsAffected > 0;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
-class function TServerController.DeleteVideo(ServerID, VideoID: TGUID): Boolean;
+class function TServerController.DeleteVideo(idServidor, idVideo: TGUID): Boolean;
 var
-  Query: TADOQuery;
-  RowsAffected: Integer;
+  query: TADOquery;
+  rowsAffected: Integer;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'DELETE FROM VIDEOS WHERE Id = :ID AND SERVIDOR_ID = :ServerId';
-    Query.Parameters.ParamByName('ID').Value := VideoID.ToString;
-    Query.Parameters.ParamByName('ServerId').Value := ServerID.ToString;
-    RowsAffected := Query.ExecSQL;
+    query.Connection := FConnection;
+    query.SQL.Text := 'DELETE FROM VIDEOS WHERE Id = :ID AND SERVIDOR_ID = :idServidor';
+    query.Parameters.ParamByName('ID').Value := idVideo.ToString;
+    query.Parameters.ParamByName('idServidor').Value := idServidor.ToString;
+    rowsAffected := query.ExecSQL;
 
-    Result := RowsAffected > 0;
+    Result := rowsAffected > 0;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
 class function TServerController.DeleteVideoRecyclerProcess(
-  Days: Integer): Boolean;
+  dias: Integer): Boolean;
 var
-  Query: TADOQuery;
-  RowsAffected: Integer;
-  DateLimit: TDateTime;
+  query: TADOquery;
+  rowsAffected: Integer;
+  dateLimit: TDateTime;
 begin
   InitializeConnection;
 
-  DateLimit := IncDay(Now, -Days);
+  dateLimit := IncDay(Now, -dias);
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'DELETE FROM VIDEOS WHERE DATA_INCLUSAO < :DateLimit';
-    Query.Parameters.ParamByName('DateLimit').Value := DateLimit;
-    RowsAffected := Query.ExecSQL;
+    query.Connection := FConnection;
+    query.SQL.Text := 'DELETE FROM VIDEOS WHERE DATA_INCLUSAO < :DateLimit';
+    query.Parameters.ParamByName('DateLimit').Value := DateLimit;
+    rowsAffected := query.ExecSQL;
 
-    Result := RowsAffected > 0;
+    Result := rowsAffected > 0;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
@@ -215,9 +215,9 @@ class function TServerController.DownloadBinaryVideo(Video: TVideo): TStream;
 begin
   Result := TMemoryStream.Create;
   try
-    if Length(Video.Content) > 0 then
+    if Length(Video.Conteudo) > 0 then
     begin
-      Result.WriteBuffer(Video.Content[0], Length(Video.Content));
+      Result.WriteBuffer(Video.Conteudo[0], Length(Video.Conteudo));
       Result.Position := 0;
     end
     else
@@ -233,60 +233,60 @@ begin
   end;
 end;
 
-class function TServerController.FindServerByID(AID: TGUID): TServer;
+class function TServerController.FindServerByID(idServidor: TGUID): TServer;
 var
-  Query: TADOQuery;
+  query: TADOquery;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'SELECT Id, NOME, IP_ADDRESS, IP_PORT FROM SERVIDOR WHERE ID = :ID';
-    Query.Parameters.ParamByName('ID').Value := AID.ToString;
-    Query.Open;
+    query.Connection := FConnection;
+    query.SQL.Text := 'SELECT Id, NOME, IP_ADDRESS, IP_PORT FROM SERVIDOR WHERE ID = :ID';
+    query.Parameters.ParamByName('ID').Value := idServidor.ToString;
+    query.Open;
 
-    if not Query.Eof then
+    if not query.Eof then
     begin
       Result := TServer.Create;
-      Result.ID := StringToGUID(Query.FieldByName('Id').AsString);
-      Result.Name := Query.FieldByName('NOME').AsString;
-      Result.IPAddress := Query.FieldByName('IP_ADDRESS').AsString;
-      Result.IPPort := Query.FieldByName('IP_PORT').AsInteger;
+      Result.Id := StringToGUID(query.FieldByName('Id').AsString);
+      Result.Nome := query.FieldByName('NOME').AsString;
+      Result.IpAddress := query.FieldByName('IP_ADDRESS').AsString;
+      Result.IpPort := query.FieldByName('IP_PORT').AsInteger;
     end
     else
       Result := nil;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
-class function TServerController.FindVideoByIDs(ServerID, VideoID: TGUID): TVideo;
+class function TServerController.FindVideoByIDs(idServidor, idVideo: TGUID): TVideo;
 var
-  Query: TADOQuery;
+  query: TADOquery;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'SELECT Id, DESCRICAO, CONTEUDO, SERVIDOR_ID, DATA_INCLUSAO FROM VIDEOS WHERE Id = :ID AND SERVIDOR_ID = :ServerId';
-    Query.Parameters.ParamByName('ID').Value := VideoID.ToString;
-    Query.Parameters.ParamByName('ServerId').Value := ServerID.ToString;
-    Query.Open;
+    query.Connection := FConnection;
+    query.SQL.Text := 'SELECT Id, DESCRICAO, CONTEUDO, SERVIDOR_ID, DATA_INCLUSAO FROM VIDEOS WHERE Id = :ID AND SERVIDOR_ID = :idServidor';
+    query.Parameters.ParamByName('ID').Value := idVideo.ToString;
+    query.Parameters.ParamByName('idServidor').Value := idServidor.ToString;
+    query.Open;
 
-    if not Query.Eof then
+    if not query.Eof then
     begin
       Result := TVideo.Create;
-      Result.ID := StringToGUID(Query.FieldByName('Id').AsString);
-      Result.Description := Query.FieldByName('DESCRICAO').AsString;
-      Result.Content := TNetEncoding.Base64.DecodeStringToBytes(Query.FieldByName('CONTEUDO').AsString);
-      Result.DataInclusao := Query.FieldByName('DATA_INCLUSAO').AsString;
+      Result.ID := StringToGUID(query.FieldByName('Id').AsString);
+      Result.Descricao := query.FieldByName('DESCRICAO').AsString;
+      Result.Conteudo := TNetEncoding.Base64.DecodeStringToBytes(query.FieldByName('CONTEUDO').AsString);
+      Result.DataInclusao := query.FieldByName('DATA_INCLUSAO').AsString;
     end
     else
       Result := nil;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
@@ -294,28 +294,28 @@ class function TServerController.GetAllServers: TJSONArray;
 var
   Servidor: TServer;
   JSONArray: TJSONArray;
-  Query: TADOQuery;
+  query: TADOquery;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'SELECT Id, NOME, IP_ADDRESS, IP_PORT FROM SERVIDOR';
-    Query.Open;
+    query.Connection := FConnection;
+    query.SQL.Text := 'SELECT Id, NOME, IP_ADDRESS, IP_PORT FROM SERVIDOR';
+    query.Open;
 
     JSONArray := TJSONArray.Create;
     try
-      while not Query.Eof do
+      while not query.Eof do
       begin
         Servidor := TServer.Create;
-        Servidor.ID := StringToGUID(Query.FieldByName('Id').AsString);
-        Servidor.Name := Query.FieldByName('NOME').AsString;
-        Servidor.IPAddress := Query.FieldByName('IP_ADDRESS').AsString;
-        Servidor.IPAddress := Query.FieldByName('IP_PORT').AsString;
+        Servidor.Id := StringToGUID(query.FieldByName('Id').AsString);
+        Servidor.Nome := query.FieldByName('NOME').AsString;
+        Servidor.IpAddress := query.FieldByName('IP_ADDRESS').AsString;
+        Servidor.IpPort := query.FieldByName('IP_PORT').AsInteger;
 
         JSONArray.AddElement(TJson.ObjectToJsonObject(Servidor));
-        Query.Next;
+        query.Next;
       end;
 
       Result := JSONArray;
@@ -324,7 +324,7 @@ begin
       raise;
     end;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
@@ -332,28 +332,28 @@ class function TServerController.GetAllVideos: TJSONArray;
 var
   Video: TVideo;
   JSONArray: TJSONArray;
-  Query: TADOQuery;
+  query: TADOquery;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'SELECT Id, DESCRICAO, CONTEUDO, SERVIDOR_ID, DATA_INCLUSAO FROM VIDEOS';
-    Query.Open;
+    query.Connection := FConnection;
+    query.SQL.Text := 'SELECT Id, DESCRICAO, CONTEUDO, SERVIDOR_ID, DATA_INCLUSAO FROM VIDEOS';
+    query.Open;
 
     JSONArray := TJSONArray.Create;
     try
-      while not Query.Eof do
+      while not query.Eof do
       begin
         Video := TVideo.Create;
-        Video.ID := StringToGUID(Query.FieldByName('Id').AsString);
-        Video.Description := Query.FieldByName('CONTEUDO').AsString;
-        Video.Content := TNetEncoding.Base64.DecodeStringToBytes(Query.FieldByName('CONTEUDO').AsString);
-        Video.DataInclusao := Query.FieldByName('DATA_INCLUSAO').AsString;
+        Video.Id := StringToGUID(query.FieldByName('Id').AsString);
+        Video.Descricao := query.FieldByName('DESCRICAO').AsString;
+        Video.Conteudo := TNetEncoding.Base64.DecodeStringToBytes(query.FieldByName('CONTEUDO').AsString);
+        Video.DataInclusao := query.FieldByName('DATA_INCLUSAO').AsString;
 
         JSONArray.AddElement(TJson.ObjectToJsonObject(Video));
-        Query.Next;
+        query.Next;
       end;
 
       Result := JSONArray;
@@ -362,18 +362,18 @@ begin
       raise;
     end;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 
-class function TServerController.GetServer(AID: TGUID): TJSONObject;
+class function TServerController.GetServer(idServidor: TGUID): TJSONObject;
 begin
-  Result := TJson.ObjectToJsonObject(FindServerByID(AID));
+  Result := TJson.ObjectToJsonObject(FindServerByID(idServidor));
 end;
 
-class function TServerController.GetVideo(ServerID, VideoID: TGUID): TJSONObject;
+class function TServerController.GetVideo(idServidor, idVideo: TGUID): TJSONObject;
 begin
-  Result := TJson.ObjectToJsonObject(FindVideoByIDs(ServerID, VideoID));
+  Result := TJson.ObjectToJsonObject(FindVideoByIDs(idServidor, idVideo));
 end;
 
 class procedure TServerController.InitializeConnection;
@@ -392,33 +392,33 @@ begin
   end;
 end;
 
-class function TServerController.UpdateServer(AID: TGUID; AName, AIPAddress: string;
-  AIPPort: Integer): TJSONObject;
+class function TServerController.UpdateServer(idServidor: TGUID; nomeServidor, ipAddress: string;
+  ipPort: Integer): TJSONObject;
 var
-  Query: TADOQuery;
-  RowsAffected: Integer;
+  query: TADOquery;
+  rowsAffected: Integer;
   Servidor: TServer;
 begin
   InitializeConnection;
 
-  Query := TADOQuery.Create(nil);
+  query := TADOquery.Create(nil);
   try
-    Query.Connection := FConnection;
-    Query.SQL.Text := 'UPDATE SERVIDOR SET NOME = :Name, IP_ADDRESS = :IPAddress, IP_PORT = :IPPort WHERE Id = :ID';
-    Query.Parameters.ParamByName('Name').Value := AName;
-    Query.Parameters.ParamByName('IPAddress').Value := AIPAddress;
-    Query.Parameters.ParamByName('IPPort').Value := AIPPort;
-    Query.Parameters.ParamByName('ID').Value := AID.ToString;
-    RowsAffected := Query.ExecSQL;
+    query.Connection := FConnection;
+    query.SQL.Text := 'UPDATE SERVIDOR SET NOME = :Name, IP_ADDRESS = :IPAddress, IP_PORT = :IPPort WHERE Id = :ID';
+    query.Parameters.ParamByName('Name').Value := nomeServidor;
+    query.Parameters.ParamByName('IPAddress').Value := ipAddress;
+    query.Parameters.ParamByName('IPPort').Value := ipPort;
+    query.Parameters.ParamByName('ID').Value := idServidor.ToString;
+    rowsAffected := query.ExecSQL;
 
-    if RowsAffected > 0 then
+    if rowsAffected > 0 then
     begin
-      Result := TJson.ObjectToJsonObject(FindServerByID(AID));
+      Result := TJson.ObjectToJsonObject(FindServerByID(idServidor));
     end
     else
       Result := nil;
   finally
-    Query.Free;
+    query.Free;
   end;
 end;
 

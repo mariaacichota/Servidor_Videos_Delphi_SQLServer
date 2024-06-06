@@ -8,15 +8,15 @@ uses
 type
   TVideo = class
   private
-    FID: TGUID;
-    FDescription: String;
-    FContent: TBytes;
+    FId: TGUID;
+    FDescricao: String;
+    FConteudo: TBytes;
     FDataInclusao: String;
 
   public
-    property ID: TGUID read FID write FID;
-    property Description: String read FDescription write FDescription;
-    property Content: TBytes read FContent write FContent;
+    property Id: TGUID read FID write FID;
+    property Descricao: String read FDescricao write FDescricao;
+    property Conteudo: TBytes read FConteudo write FConteudo;
     property DataInclusao: String read FDataInclusao write FDataInclusao;
   end;
 

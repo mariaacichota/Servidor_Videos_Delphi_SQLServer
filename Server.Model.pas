@@ -3,28 +3,24 @@ unit Server.Model;
 interface
 
 uses
-  System.SysUtils, System.Classes, Videos.Model, System.Generics.Collections,
+  System.SysUtils, System.Classes, System.Generics.Collections,
   FireDAC.Comp.Client, FireDAC.Stan.Param;
 
 type
   TServer = class
   private
-    FID: TGUID;
-    FName: string;
-    FIPAddress: string;
-    FIPPort: Integer;
-    FVideoList: TObjectList<TVideo>;
+    FId: TGUID;
+    FNome: string;
+    FIpAddress: string;
+    FIpPort: Integer;
   public
     constructor Create;
     destructor Destroy; override;
-    property ID: TGUID read FID write FID;
-    property Name: string read FName write FName;
-    property IPAddress: string read FIPAddress write FIPAddress;
-    property IPPort: Integer read FIPPort write FIPPort;
+    property Id: TGUID read FId write FId;
+    property Nome: string read FNome write FNome;
+    property IpAddress: string read FIpAddress write FIpAddress;
+    property IpPort: Integer read FIpPort write FIpPort;
   end;
-
-var
-  ServerList: TList<TServer>;
 
 implementation
 
@@ -41,10 +37,8 @@ end;
 
 
 initialization
-  ServerList := TList<TServer>.Create;
 
 finalization
-  ServerList.Free;
 
 end.
 

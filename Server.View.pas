@@ -23,8 +23,6 @@ type
     procedure ButtonStartClick(Sender: TObject);
     procedure ButtonStopClick(Sender: TObject);
     procedure ButtonOpenBrowserClick(Sender: TObject);
-    function VideoToBase64(const AFileName: string): string;
-    procedure SendVideoToServer(const ServerID, Description, VideoBase64, InclusionDate: string);
   private
     FServer: TIdHTTPWebBrokerBridge;
     procedure StartServer;
@@ -92,38 +90,6 @@ begin
   FServer := TIdHTTPWebBrokerBridge.Create(Self);
 end;
 
-procedure TfrmPrincipalServer.SendVideoToServer(const ServerID, Description, VideoBase64,
-  InclusionDate: string);
-var
-  HTTPClient: TIdHTTP;
-  SSLHandler: TIdSSLIOHandlerSocketOpenSSL;
-  JSONObj: TJSONObject;
-  Response: string;
-begin
-  HTTPClient := TIdHTTP.Create(nil);
-  SSLHandler := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-  try
-    HTTPClient.IOHandler := SSLHandler;
-    HTTPClient.Request.ContentType := 'application/json';
-
-    JSONObj := TJSONObject.Create;
-    try
-      JSONObj.AddPair('server_id', ServerID);
-      JSONObj.AddPair('description', Description);
-      JSONObj.AddPair('content', VideoBase64);
-      JSONObj.AddPair('inclusion_date', InclusionDate);
-
-      HTTPClient.Request.Connection := 'close';
-      Response := HTTPClient.Post('http://localhost:8080/api/servers/video', TStringStream.Create(JSONObj.ToString, TEncoding.UTF8));
-    finally
-      JSONObj.Free;
-    end;
-  finally
-    SSLHandler.Free;
-    HTTPClient.Free;
-  end;
-end;
-
 procedure TfrmPrincipalServer.StartServer;
 begin
   if not FServer.Active then
@@ -131,25 +97,6 @@ begin
     FServer.Bindings.Clear;
     FServer.DefaultPort := StrToInt(EditPort.Text);
     FServer.Active := True;
-  end;
-end;
-
-function TfrmPrincipalServer.VideoToBase64(const AFileName: string): string;
-var
-  VideoStream: TMemoryStream;
-  Base64Encoder: TBase64Encoding;
-begin
-  VideoStream := TMemoryStream.Create;
-  try
-    VideoStream.LoadFromFile(AFileName);
-    Base64Encoder := TBase64Encoding.Create;
-    try
-      Result := Base64Encoder.EncodeBytesToString(VideoStream.Memory, VideoStream.Size);
-    finally
-      Base64Encoder.Free;
-    end;
-  finally
-    VideoStream.Free;
   end;
 end;
 

@@ -27,7 +27,7 @@ type
     procedure WebModuleBeforeDispatch(Sender: TObject; Request: TWebRequest;
       Response: TWebResponse; var Handled: Boolean);
   private
-    function GetIDsFromURL(const URL: string; out ServerID, VideoID: TGUID): Boolean;
+    function GetIDsFromURL(const URL: string; out idServidor, idVideo: TGUID): Boolean;
     procedure PostVideoToServer;
     procedure PostCreateServer;
     procedure PutUpdateServer;
@@ -64,13 +64,13 @@ begin
   Response.Content :=
     'Nenhuma ação foi encontrada para esse caminho! Verfique se o caminho confere com os URLs pré-estabelecidos: ' + #13+
     ' /api/server' + #13+
-    ' /api/servers/{serverId}' + #13+
-    ' /api/servers/available/{serverId}' + #13+
+    ' /api/servers/{idServidor}' + #13+
+    ' /api/servers/available/{idServidor}' + #13+
     ' /api/servers' + #13+
-    ' /api/servers/{serverId}/videos' + #13+
-    ' /api/servers/{serverId}/videos/{videoId}' + #13+
-    ' /api/servers/{serverId}/videos/{videoId}/binary' + #13+
-    ' /api/servers/{serverId}/vid' + #13+
+    ' /api/servers/{idServidor}/videos' + #13+
+    ' /api/servers/{idServidor}/videos/{idVideo}' + #13+
+    ' /api/servers/{idServidor}/videos/{idVideo}/binary' + #13+
+    ' /api/servers/{idServidor}/vid' + #13+
     ' /api/recycler/process/{days}' + #13+
     ' /api/recycler/status' + #13;
 end;
@@ -136,11 +136,11 @@ end;
 
 procedure TWebModule1.DeleteServer;
 var
-  ServerID: TGUID;
+  idServidor: TGUID;
 begin
 
   try
-    ServerID := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/') + 1));
+    idServidor := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/') + 1));
   except
   on E: Exception do
     begin
@@ -151,7 +151,7 @@ begin
     end;
   end;
 
-  if TServerController.DeleteServer(ServerID) then
+  if TServerController.DeleteServer(idServidor) then
   begin
     Response.StatusCode := 204; // No Content (Sucess, no response needed)
   end
@@ -164,13 +164,13 @@ end;
 
 procedure TWebModule1.DeleteVideo;
 var
-  ServerID, VideoID: TGUID;
+  idServidor, idVideo: TGUID;
   URL: string;
 begin
   URL := Request.PathInfo;
 
-  if GetIDsFromURL(URL, ServerID, VideoID) then
-    if TServerController.DeleteVideo(ServerID, VideoID) then
+  if GetIDsFromURL(URL, idServidor, idVideo) then
+    if TServerController.DeleteVideo(idServidor, idVideo) then
     begin
       Response.StatusCode := 204; // No Content (Sucess, no response needed)
     end
@@ -183,15 +183,15 @@ end;
 
 procedure TWebModule1.DeleteVideoRecyclerProcess;
 var
-  DaysStr: string;
-  Days: Integer;
+  daysStr: string;
+  days: Integer;
 begin
-  DaysStr := Copy(Request.PathInfo, Length('/api/recycler/process/') + 1);
-  Days := StrToInt(DaysStr);
+  daysStr := Copy(Request.PathInfo, Length('/api/recycler/process/') + 1);
+  days := StrToInt(daysStr);
 
   RecyclerIsRunning := True;
 
-  if TServerController.DeleteVideoRecyclerProcess(Days) then
+  if TServerController.DeleteVideoRecyclerProcess(days) then
   begin
     RecyclerIsRunning := False;
     Response.StatusCode := 204;
@@ -206,56 +206,56 @@ end;
 
 procedure TWebModule1.GetAllServers;
 var
-  ServerListJSON: TJSONArray;
+  serverListJSON: TJSONArray;
 begin
-  ServerListJSON := TServerController.GetAllServers;
+  serverListJSON := TServerController.GetAllServers;
   try
     Response.ContentType := 'application/json';
-    Response.Content := ServerListJSON.ToString;
+    Response.Content := serverListJSON.ToString;
   finally
-    ServerListJSON.Free;
+    serverListJSON.Free;
   end;
 end;
 
 procedure TWebModule1.GetAllVideos;
 var
-  VideoListJSON: TJSONArray;
+  videoListJSON: TJSONArray;
 begin
   VideoListJSON := TServerController.GetAllVideos;
   try
     Response.ContentType := 'application/json';
-    Response.Content := VideoListJSON.ToString;
+    Response.Content := videoListJSON.ToString;
   finally
-    VideoListJSON.Free;
+    videoListJSON.Free;
   end;
 end;
 
 
-function TWebModule1.GetIDsFromURL(const URL: string; out ServerID, VideoID: TGUID): Boolean;
+function TWebModule1.GetIDsFromURL(const URL: string; out idServidor, idVideo: TGUID): Boolean;
 var
-  ServerIDStr, VideoIDStr: string;
-  ServerIDPos, VideoIDPos, BinaryPos: Integer;
+  idServidorStr, idVideoStr: string;
+  idServidorPos, idVideoPos, BinaryPos: Integer;
 begin
   Result := False;
 
-  ServerIDPos := Pos('/api/servers/', URL);
-  if ServerIDPos = 0 then Exit;
+  idServidorPos := Pos('/api/servers/', URL);
+  if idServidorPos = 0 then Exit;
 
-  VideoIDPos := Pos('/videos/', URL);
-  if VideoIDPos = 0 then Exit;
+  idVideoPos := Pos('/videos/', URL);
+  if idVideoPos = 0 then Exit;
 
-  ServerIDStr := Copy(URL, ServerIDPos + Length('/api/servers/'),
-    VideoIDPos - (ServerIDPos + Length('/api/servers/')));
+  idServidorStr := Copy(URL, idServidorPos + Length('/api/servers/'),
+    idVideoPos - (idServidorPos + Length('/api/servers/')));
 
   BinaryPos := Pos('/binary', URL);
   if BinaryPos > 0 then
-    VideoIDStr := Copy(URL, VideoIDPos + Length('/videos/'), BinaryPos - (VideoIDPos + Length('/videos/')))
+    idVideoStr := Copy(URL, idVideoPos + Length('/videos/'), BinaryPos - (idVideoPos + Length('/videos/')))
   else
-    VideoIDStr := Copy(URL, VideoIDPos + Length('/videos/'), Length(URL) - (VideoIDPos + Length('/videos/')) + 1);
+    idVideoStr := Copy(URL, idVideoPos + Length('/videos/'), Length(URL) - (idVideoPos + Length('/videos/')) + 1);
 
   try
-    ServerID := StringToGUID(ServerIDStr);
-    VideoID := StringToGUID(VideoIDStr);
+    idServidor := StringToGUID(idServidorStr);
+    idVideo := StringToGUID(idVideoStr);
     Result := True;
   except
     Result := False;
@@ -268,17 +268,17 @@ begin
     Response.Content := TJSONObject.Create.AddPair('status', 'is running').ToString
   else
     Response.Content := TJSONObject.Create.AddPair('status', 'not running').ToString;
-  Response.StatusCode := 200; 
+  Response.StatusCode := 200;
 end;
 
 procedure TWebModule1.GetServer;
 var
-  ServerID: TGUID;
-  ServerJSON: TJSONObject;
+  idServidor: TGUID;
+  serverJSON: TJSONObject;
 begin
 
   try
-    ServerID := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/') + 1));
+    idServidor := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/') + 1));
   except
     on E: Exception do
     begin
@@ -288,12 +288,12 @@ begin
     end;
   end;
 
-  ServerJSON := TServerController.GetServer(ServerID);
+  serverJSON := TServerController.GetServer(idServidor);
   try
-    if Assigned(ServerJSON) then
+    if Assigned(serverJSON) then
     begin
       Response.ContentType := 'application/json';
-      Response.Content := ServerJSON.ToString;
+      Response.Content := serverJSON.ToString;
     end
     else
     begin
@@ -301,20 +301,20 @@ begin
       Response.Content := '{"error":"Server not found"}';
     end;
     finally
-      ServerJSON.Free;
+      serverJSON.Free;
     end;
 end;
 
 procedure TWebModule1.GetServerAvailable;
 var
-  ServerID: TGUID;
-  ServerAvailable: Boolean;
+  idServidor: TGUID;
+  serverAvailable: Boolean;
   Server : TServer;
   JSONObjResponse : TJSONObject;
 begin
 
   try
-    ServerID := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/available/') + 1, MaxInt));
+    idServidor := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/available/') + 1, MaxInt));
   except
     on E: Exception do
     begin
@@ -324,7 +324,7 @@ begin
     end;
   end;
 
-  Server := TServerController.FindServerByID(ServerID);
+  Server := TServerController.FindServerByID(idServidor);
   if not Assigned(Server) then
   begin
     Response.StatusCode := 404; // Not Found
@@ -332,13 +332,13 @@ begin
     Exit;
   end;
 
-  ServerAvailable := TServerController.CheckServerAvailability(ServerID);
+  ServerAvailable := TServerController.CheckServerAvailability(idServidor);
 
   JSONObjResponse := TJSONObject.Create;
   try
-    JSONObjResponse.AddPair('ip_address', Server.IPAddress);
-    JSONObjResponse.AddPair('ip_port', Server.IPPort.ToString);
-    JSONObjResponse.AddPair('available', TJSONBool.Create(ServerAvailable));
+    JSONObjResponse.AddPair('ip_address', Server.IpAddress);
+    JSONObjResponse.AddPair('ip_port', Server.IpPort.ToString);
+    JSONObjResponse.AddPair('available', TJSONBool.Create(serverAvailable));
 
     Response.ContentType := 'application/json';
     Response.Content := JSONObjResponse.ToString;
@@ -349,19 +349,19 @@ end;
 
 procedure TWebModule1.GetVideo;
 var
-  ServerID, VideoID: TGUID;
-  VideoJSON: TJSONObject;
+  idServidor, idVideo: TGUID;
+  videoJSON: TJSONObject;
   URL: String;
 begin
   URL := Request.PathInfo;
 
-  if GetIDsFromURL(URL, ServerID, VideoID) then
-    VideoJSON := TServerController.GetVideo(ServerID, VideoID);
+  if GetIDsFromURL(URL, idServidor, idVideo) then
+    videoJSON := TServerController.GetVideo(idServidor, idVideo);
     try
-      if Assigned(VideoJSON) then
+      if Assigned(videoJSON) then
       begin
         Response.ContentType := 'application/json';
-        Response.Content := VideoJSON.ToString;
+        Response.Content := videoJSON.ToString;
       end
       else
       begin
@@ -369,15 +369,15 @@ begin
         Response.Content := '{"error":"Server not found"}';
       end;
       finally
-        VideoJSON.Free;
+        videoJSON.Free;
       end;
 end;
 
 procedure TWebModule1.PostCreateServer;
 var
-  ServerName, ServerIPAddress: string;
-  ServerIPPort: Integer;
-  ServerJSON: TJSONObject;
+  nomeServidor, ipAddress: string;
+  ipPort: Integer;
+  serverJSON: TJSONObject;
   JSONObj: TJSONObject;
 begin
   JSONObj := TJSONObject.ParseJSONValue(Request.Content) as TJSONObject;
@@ -389,25 +389,25 @@ begin
     exit;
   end;
 
-  ServerName := JSONObj.GetValue<string>('name');
-  ServerIPAddress := JSONObj.GetValue<string>('ip_address');
-  ServerIPPort := JSONObj.GetValue<Integer>('ip_port');
+  nomeServidor := JSONObj.GetValue<string>('name');
+  ipAddress := JSONObj.GetValue<string>('ip_address');
+  ipPort := JSONObj.GetValue<Integer>('ip_port');
 
-  ServerJSON := TServerController.CreateServer(ServerName, ServerIPAddress, ServerIPPort);
-
+  serverJSON := TServerController.CreateServer(nomeServidor, ipAddress, ipPort);
+  
   Response.ContentType := 'application/json';
-  Response.Content := ServerJSON.ToString;
+  Response.Content := serverJSON.ToString;
 
   Response.StatusCode := 201;
 end;
 
 procedure TWebModule1.PostVideoToServer;
 var
-  ServerID: TGUID;
+  idServidor: TGUID;
   Server: TServer;
-  Description, VideoBase64: String;
-  InclusionDate: TDate;
-  VideoJSON: TJSONObject;
+  descricao, videoBase64: String;
+  dataInclusao: TDate;
+  videoJSON: TJSONObject;
   JSONObj: TJSONObject;
 begin
   JSONObj := TJSONObject.ParseJSONValue(Request.Content) as TJSONObject;
@@ -419,41 +419,41 @@ begin
     exit;
   end;
 
-  ServerID := StringToGUID(JSONObj.GetValue<string>('server_id'));
-  Description := JSONObj.GetValue<string>('description');
-  VideoBase64 := JSONObj.GetValue<string>('content');
-  InclusionDate := ISO8601ToDate(JSONObj.GetValue<string>('inclusion_date'));
+  idServidor := StringToGUID(JSONObj.GetValue<string>('server_id'));
+  descricao := JSONObj.GetValue<string>('description');
+  videoBase64 := JSONObj.GetValue<string>('content');
+  dataInclusao := ISO8601ToDate(JSONObj.GetValue<string>('inclusion_date'));
 
-  Server := TServerController.FindServerByID(ServerID);
+  Server := TServerController.FindServerByID(idServidor);
   if not Assigned(Server) then
     raise Exception.Create('Server not found');
 
-  VideoJSON := TServerController.CreateVideo(Server, Description, VideoBase64, InclusionDate);
+  videoJSON := TServerController.CreateVideo(Server, descricao, videoBase64, dataInclusao);
 
   Response.ContentType := 'application/json';
-  Response.Content := VideoJSON.ToString;
+  Response.Content := videoJSON.ToString;
 
   Response.StatusCode := 201;
 end;
 
 procedure TWebModule1.GetDownloadBinaryVideo;
 var
-  ServerID, VideoID: TGUID;
+  idServidor, idVideo: TGUID;
   Server: TServer;
   Video: TVideo;
   URL: String;
-  VideoStream: TStream;
+  videoStream: TStream;
 begin
   URL := Request.PathInfo;
 
-  if GetIDsFromURL(URL, ServerID, VideoID) then
+  if GetIDsFromURL(URL, idServidor, idVideo) then
   begin
-    Server := TServerController.FindServerByID(ServerID);
-    Video := TServerController.FindVideoByIDs(ServerID, VideoID);
+    Server := TServerController.FindServerByID(idServidor);
+    Video := TServerController.FindVideoByIDs(idServidor, idVideo);
 
     if Assigned(Video) and Assigned(Server) then
     begin
-      VideoStream := TServerController.DownloadBinaryVideo(Video);
+      videoStream := TServerController.DownloadBinaryVideo(Video);
       try
         if VideoStream.Size > 0 then
         begin
@@ -492,10 +492,10 @@ end;
 
 procedure TWebModule1.PutUpdateServer;
 var
-  ServerName, ServerIPAddress: string;
-  ServerIPPort: Integer;
-  ServerID: TGUID;
-  ServerJSON: TJSONObject;
+  nomeServidor, ipAddress: string;
+  ipPort: Integer;
+  idServidor: TGUID;
+  serverJSON: TJSONObject;
   JSONObj: TJSONObject;
 begin
   JSONObj := TJSONObject.ParseJSONValue(Request.Content) as TJSONObject;
@@ -509,7 +509,7 @@ begin
 
 
   try
-   ServerID := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/') + 1));
+   idServidor := StringToGUID(Copy(Request.PathInfo, Length('/api/servers/') + 1));
   except
   on E: Exception do
     begin
@@ -520,16 +520,16 @@ begin
     end;
   end;
 
-  ServerName := JSONObj.GetValue<string>('name');
-  ServerIPAddress := JSONObj.GetValue<string>('ip_address');
-  ServerIPPort := JSONObj.GetValue<Integer>('ip_port');
+  nomeServidor := JSONObj.GetValue<string>('name');
+  ipAddress := JSONObj.GetValue<string>('ip_address');
+  ipPort := JSONObj.GetValue<Integer>('ip_port');
 
-  ServerJSON := TServerController.UpdateServer(ServerID, ServerName, ServerIPAddress, ServerIPPort);
+  serverJSON := TServerController.UpdateServer(idServidor, nomeServidor, ipAddress, ipPort);
 
-  if Assigned(ServerJSON) then
+  if Assigned(serverJSON) then
   begin
     Response.ContentType := 'application/json';
-    Response.Content := ServerJSON.ToString;
+    Response.Content := serverJSON.ToString;
 
     Response.StatusCode := 200;
   end;

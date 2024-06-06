@@ -19,8 +19,8 @@ object frmPrincipalServer: TfrmPrincipalServer
     Height = 240
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 1017
-    ExplicitHeight = 340
+    ExplicitWidth = 224
+    ExplicitHeight = 232
     object lblPort: TLabel
       Left = 16
       Top = 91
