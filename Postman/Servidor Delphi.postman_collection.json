@@ -1,0 +1,418 @@
+{
+	"info": {
+		"_postman_id": "e16f8f0f-d380-43aa-aaaa-34aa840b89d8",
+		"name": "Servidor Delphi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "35962608"
+	},
+	"item": [
+		{
+			"name": "Criar Servidor",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Servidor Video Postman\",\r\n  \"ip_address\": \"127.0.0.1\",\r\n  \"ip_port\": 8080\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/server",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"server"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Atualizar um servidor",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"SERVER ALTERADO\",\r\n  \"ip_address\": \"127.0.0.1\",\r\n  \"ip_port\": 8080\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remover Servidor Existente",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"My Server\",\r\n  \"ip_address\": \"127.0.0.1\",\r\n  \"ip_port\": 8080\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recuperar um Servidor Existente",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Checar disponibilidade de um servidor",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"My Server\",\r\n  \"ip_address\": \"127.0.0.1\",\r\n  \"ip_port\": 8080\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/available/{serverId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"available",
+						"{serverId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Todos os Servidores",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adicionar um novo vídeo a um servidor",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"server_id\": \"{013486E6-FF25-44DA-9CCB-B0D9DBC0B9D0}\",\r\n    \"description\": \"My Test Video\",\r\n    \"content\": \"SGVsbG8sIFdvcmxkIQ==\",\r\n    \"inclusion_date\": \"2024-06-04T19:31:45\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}/videos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}",
+						"videos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remover um vídeo",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}/videos/{videoId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}",
+						"videos",
+						"{videoId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Recuperar dados cadastrais de um vídeo",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}/videos/{videoId}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}",
+						"videos",
+						"{videoId}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download do conteúdo binário de um vídeo",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}/videos/{videoId}/binary",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}",
+						"videos",
+						"{videoId}",
+						"binary"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar dados cadastrais de todos os vídeo de um servidor",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/servers/{serverId}/videos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"servers",
+						"{serverId}",
+						"videos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Reciclar vídeos antigos",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"My Server\",\r\n  \"ip_address\": \"127.0.0.1\",\r\n  \"ip_port\": 8080\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/recycler/process/{days}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"recycler",
+						"process",
+						"{days}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Verificar status do reciclador de vídeos antigos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"My Server\",\r\n  \"ip_address\": \"127.0.0.1\",\r\n  \"ip_port\": 8080\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/recycler/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"recycler",
+						"status"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

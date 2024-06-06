@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{DDF92D65-E3ED-414E-899E-1A1F79561A5B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TestesServidorDelphi.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ServidorDelphi.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TestesServidorDelphi">
+        <MSBuild Projects="TestesServidorDelphi.dproj"/>
+    </Target>
+    <Target Name="TestesServidorDelphi:Clean">
+        <MSBuild Projects="TestesServidorDelphi.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TestesServidorDelphi:Make">
+        <MSBuild Projects="TestesServidorDelphi.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ServidorDelphi">
+        <MSBuild Projects="ServidorDelphi.dproj"/>
+    </Target>
+    <Target Name="ServidorDelphi:Clean">
+        <MSBuild Projects="ServidorDelphi.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ServidorDelphi:Make">
+        <MSBuild Projects="ServidorDelphi.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TestesServidorDelphi;ServidorDelphi"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TestesServidorDelphi:Clean;ServidorDelphi:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TestesServidorDelphi:Make;ServidorDelphi:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

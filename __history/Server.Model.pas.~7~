@@ -1,0 +1,62 @@
+unit Server.Model;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Videos.Model, System.Generics.Collections,
+  FireDAC.Comp.Client, FireDAC.Stan.Param;
+
+type
+  TServer = class
+  private
+    FID: TGUID;
+    FName: string;
+    FIPAddress: string;
+    FIPPort: Integer;
+    FVideoList: TObjectList<TVideo>;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    function SaveToDatabase: Boolean;
+    property ID: TGUID read FID write FID;
+    property Name: string read FName write FName;
+    property IPAddress: string read FIPAddress write FIPAddress;
+    property IPPort: Integer read FIPPort write FIPPort;
+    property VideoList: TObjectList<TVideo> read FVideoList write FVideoList;
+  end;
+
+implementation
+
+constructor TServer.Create;
+begin
+  inherited;
+  FVideoList := TObjectList<TVideo>.Create;
+end;
+
+destructor TServer.Destroy;
+begin
+  FVideoList.Free;
+  inherited;
+end;
+
+function TServer.SaveToDatabase: Boolean;
+var
+  Query: TFDQuery;
+begin
+  Query := TFDQuery.Create(nil);
+  try
+    Query.Connection := GetFDConnection; // Obtenha a conexão com o banco de dados
+    Query.SQL.Text := 'INSERT INTO SERVIDOR (Id, NOME, IP_ADDRESS, IP_PORT) VALUES (:Id, :Nome, :IPAddress, :IPPort)';
+    Query.ParamByName('Id').AsGuid := ID;
+    Query.ParamByName('Nome').AsString := Name;
+    Query.ParamByName('IPAddress').AsString := IPAddress;
+    Query.ParamByName('IPPort').AsInteger := IPPort;
+    Query.ExecSQL;
+    Result := True;
+  finally
+    Query.Free;
+  end;
+end;
+
+end.
+
